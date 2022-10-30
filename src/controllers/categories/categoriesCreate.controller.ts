@@ -4,9 +4,7 @@ import categoriesCreateService from "../../services/categories/categoriesCreate.
 
 const categoriesCreateController = async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
-
-    const createdCategory = await categoriesCreateService({ name });
+    const createdCategory = await categoriesCreateService(req.body);
 
     return res.status(201).send(createdCategory);
   } catch (err) {

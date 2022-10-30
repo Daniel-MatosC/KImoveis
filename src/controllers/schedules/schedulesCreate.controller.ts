@@ -13,8 +13,9 @@ const schedulesCreateController = async (req: Request, res: Response) => {
       date,
       hour,
     });
-    console.log(schedule);
-    return res.status(201).json(schedule);
+    return res
+      .status(201)
+      .json({ message: "Schedule created", schedule: schedule });
   } catch (err) {
     if (err instanceof Error) {
       if (err instanceof AppError) {

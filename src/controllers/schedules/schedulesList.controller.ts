@@ -8,7 +8,7 @@ const schedulesListController = async (req: Request, res: Response) => {
 
     const schedules = await scheduleListService(id);
 
-    return res.json(schedules);
+    return res.json({ schedules: schedules });
   } catch (err) {
     if (err instanceof AppError) {
       handleError(err, res);

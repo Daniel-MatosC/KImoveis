@@ -4,27 +4,22 @@ import { AppError } from "../../errors/appError";
 import { Category } from "../../entities/category.entity";
 import AppDataSource from "../../data-source";
 
-const categoriesCreateService = async ({ name }: ICategoryRequest) => {
+const categoriesCreateService = async (
+  category: Category
+): Promise<ICategoryRequest> => {
   const categoryRepository = AppDataSource.getRepository(Category);
 
-  const categories = await categoryRepository.find();
+  const categoryExists = await categoryRepository.findOneBy({
+    name: category.name,
+  });
 
-  const category = categories.find((e) => e.name === name);
-
-  if (!name) {
-    throw new AppError(400, "Name required");
-  }
-
-  if (category) {
+  if (categoryExists) {
     throw new AppError(400, "Category already exists");
   }
 
-  const categoryCreated: ICategory = categoryRepository.create({
-    id: uuid(),
-    name,
-  });
+  const categoryCreated = categoryRepository.create({ name: category.name });
 
-  categoryRepository.save(categoryCreated);
+  await categoryRepository.save(categoryCreated);
 
   return categoryCreated;
 };

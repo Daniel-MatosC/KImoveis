@@ -4,16 +4,25 @@ import { AppError } from "../../errors/appError";
 import { IIdCategory } from "../../interfaces/categories";
 
 const categoriesListPropertiesService = async ({ id }: IIdCategory) => {
-  const categoryRepository = AppDataSource.getRepository(Category);
+  try {
+    const categoryRepository = AppDataSource.getRepository(Category);
 
-  const categories = await categoryRepository.find();
+    const categories = await categoryRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        properties: true,
+      },
+    });
 
-  const category = categories.find((e) => e.id === id);
-
-  if (!category) {
+    if (!categories) {
+      throw new AppError(404, "Category not found");
+    }
+    return categories;
+  } catch (err) {
     throw new AppError(404, "Invalid Id");
   }
-  return category.properties;
 };
 
 export default categoriesListPropertiesService;

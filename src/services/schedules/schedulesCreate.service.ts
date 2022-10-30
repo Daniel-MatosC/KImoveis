@@ -1,9 +1,8 @@
 import AppDataSource from "../../data-source";
 import { Properties } from "../../entities/properties.entity";
 import { Schedules } from "../../entities/schedules_user_properties.entity";
-import { ISchedule, IScheduleRequest } from "../../interfaces/schedules";
+import { IScheduleRequest } from "../../interfaces/schedules";
 import { User } from "../../entities/user.entity";
-import { v4 as uuid } from "uuid";
 import { AppError } from "../../errors/appError";
 
 const scheduleCreateService = async ({
@@ -20,18 +19,23 @@ const scheduleCreateService = async ({
   const propertiesRepository = AppDataSource.getRepository(Properties);
   const userRepository = AppDataSource.getRepository(User);
 
-  const schedules = await scheduleRepository.find();
-  const properties = await propertiesRepository.find();
-  const users = await userRepository.find();
+  const schedulesAll = await scheduleRepository.find();
+  const scheduleExist = schedulesAll.find((schedule) => schedule);
+  const Property = await propertiesRepository.findOneBy({
+    id: propertyId,
+  });
 
-  const property = properties.find((e) => e.id === propertyId);
+  const user = await userRepository.findOneBy({ id: userId });
 
-  if (!property) {
+  if (!user) {
+    throw new AppError(400, "User not found");
+  }
+
+  if (!Property) {
     throw new AppError(404, "Inavalid Property Id");
   }
-  const schedule = schedules.find((e) => e.hour === hour && e.date === date);
 
-  if (schedule) {
+  if (scheduleExist) {
     throw new AppError(400, "There is already a visitor at this horary");
   }
 
@@ -42,17 +46,15 @@ const scheduleCreateService = async ({
     );
   }
 
-  const user = users.find((e) => e.id === userId);
-
   const scheduleCreated = scheduleRepository.create({
     hour,
     user,
-    properties: property,
+    properties: Property,
     date,
   });
 
   await scheduleRepository.save(scheduleCreated);
-  console.log(scheduleCreated);
+
   return scheduleCreated;
 };
 

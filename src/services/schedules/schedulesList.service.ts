@@ -5,9 +5,12 @@ import { AppError } from "../../errors/appError";
 const scheduleListService = async (id: string) => {
   const propertiesRepository = AppDataSource.getRepository(Properties);
 
-  const properties = await propertiesRepository.find();
-
-  const propertie = properties.find((e) => e.id === id);
+  const propertie = await propertiesRepository.findOne({
+    where: { id },
+    relations: {
+      schedules: true,
+    },
+  });
 
   if (!propertie) {
     throw new AppError(404, "Incorrect Id");
@@ -19,5 +22,4 @@ const scheduleListService = async (id: string) => {
 
   return propertie.schedules;
 };
-
 export default scheduleListService;
